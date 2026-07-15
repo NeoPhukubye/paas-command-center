@@ -1,8 +1,11 @@
 import snowflake.connector
+from fastapi import HTTPException
 from app.config import settings
 
 
 def get_connection():
+    if not settings.SNOWFLAKE_ACCOUNT:
+        raise HTTPException(status_code=503, detail="Snowflake credentials not configured")
     return snowflake.connector.connect(
         account=settings.SNOWFLAKE_ACCOUNT,
         user=settings.SNOWFLAKE_USER,
@@ -15,7 +18,12 @@ def get_connection():
 
 
 def query(sql: str, params: tuple = ()) -> list[dict]:
-    conn = get_connection()
+    try:
+        conn = get_connection()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database connection failed: {str(e)}")
     cur = conn.cursor()
     try:
         cur.execute(sql, params)
