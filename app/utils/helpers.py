@@ -1,9 +1,16 @@
-import snowflake.connector
 from fastapi import HTTPException
 from app.config import settings
 
+try:
+    import snowflake.connector
+    HAS_SNOWFLAKE = True
+except ImportError:
+    HAS_SNOWFLAKE = False
+
 
 def get_connection():
+    if not HAS_SNOWFLAKE:
+        raise HTTPException(status_code=503, detail="snowflake-connector-python not installed")
     if not settings.SNOWFLAKE_ACCOUNT:
         raise HTTPException(status_code=503, detail="Snowflake credentials not configured")
     return snowflake.connector.connect(
