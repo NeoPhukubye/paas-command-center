@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-dotenv==1.0.0
+pydantic
+snowflake-connector-python>=3.6.0,<4.0.0
+pandas==2.2.2
+pytest==8.2.2
+SQLAlchemy==1.4.47
+snowflake-sqlalchemy==1.5.1
