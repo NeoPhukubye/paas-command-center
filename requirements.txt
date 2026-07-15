@@ -1,9 +1,9 @@
-fastapi==0.111.0
-uvicorn==0.30.1
+fastapi
+uvicorn
 python-dotenv==1.0.0
 snowflake-connector-python==3.9.0
 pandas==2.2.2
-pydantic==2.7.4
+pydantic
 pytest==8.2.2
 SQLAlchemy==1.4.47
 snowflake-sqlalchemy==1.5.1
