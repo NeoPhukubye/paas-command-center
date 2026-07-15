@@ -241,16 +241,16 @@ class TestGenerateCustomerCrm:
             for row in high_value:
                 assert row[5] >= 0.65
 
-    def test_low_value_customers_have_low_churn(self):
+    def test_low_value_customers_have_bounded_churn(self):
         random.seed(42)
         mock_cur = MagicMock()
         setup_db.generate_customer_crm(mock_cur, num_records=200)
         rows = mock_cur.executemany.call_args[0][1]
 
-        low_value = [row for row in rows if row[4] <= 40000]
+        low_value = [row for row in rows if row[4] <= 15000]
         if low_value:
             for row in low_value:
-                assert row[5] <= 0.45
+                assert row[5] <= 0.35
 
 
 class TestMain:

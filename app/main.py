@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from app.routers import ops, finance, growth
+from app.routers import ops, finance, growth, agent
 
 app = FastAPI(
     title="PaaS Command Center",
@@ -11,6 +11,7 @@ app = FastAPI(
 app.include_router(ops.router)
 app.include_router(finance.router)
 app.include_router(growth.router)
+app.include_router(agent.router)
 
 
 @app.get("/", response_class=HTMLResponse)
