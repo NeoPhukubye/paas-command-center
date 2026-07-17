@@ -15,8 +15,17 @@ def _get_private_key_bytes():
     key_data = settings.SNOWFLAKE_PRIVATE_KEY
     if not key_data:
         return None
-    # Render env vars replace newlines with literal \n
+    # Render may encode newlines as literal \n or strip them entirely
     key_data = key_data.replace("\\n", "\n")
+    # If pasted as a single line without newlines, reconstruct PEM format
+    if "-----BEGIN" in key_data and "\n" not in key_data.strip().split("-----")[2]:
+        key_data = key_data.replace("-----BEGIN PRIVATE KEY-----", "")
+        key_data = key_data.replace("-----END PRIVATE KEY-----", "")
+        key_data = key_data.replace(" ", "")
+        # Re-wrap base64 at 64 chars
+        raw = key_data.strip()
+        lines = [raw[i:i+64] for i in range(0, len(raw), 64)]
+        key_data = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(lines) + "\n-----END PRIVATE KEY-----\n"
     p_key = serialization.load_pem_private_key(key_data.encode(), password=None)
     return p_key.private_bytes(
         encoding=serialization.Encoding.DER,
