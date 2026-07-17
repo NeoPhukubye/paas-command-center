@@ -8,6 +8,7 @@ class Settings:
     SNOWFLAKE_ACCOUNT: str = os.getenv("SNOWFLAKE_ACCOUNT", "")
     SNOWFLAKE_USER: str = os.getenv("SNOWFLAKE_USER", "")
     SNOWFLAKE_PASSWORD: str = os.getenv("SNOWFLAKE_PASSWORD", "")
+    SNOWFLAKE_PRIVATE_KEY: str = os.getenv("SNOWFLAKE_PRIVATE_KEY", "")
     SNOWFLAKE_WAREHOUSE: str = os.getenv("SNOWFLAKE_WAREHOUSE", "")
     SNOWFLAKE_DATABASE: str = os.getenv("SNOWFLAKE_DATABASE", "")
     SNOWFLAKE_SCHEMA: str = os.getenv("SNOWFLAKE_SCHEMA", "")
