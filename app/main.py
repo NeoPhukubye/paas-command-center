@@ -1,11 +1,25 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from app.routers import ops, finance, growth, agent
+
+
+@asynccontextmanager
+async def lifespan(app):
+    # Seed database on startup if tables are empty
+    try:
+        import subprocess, sys
+        subprocess.run([sys.executable, "scripts/setup_db.py"], timeout=60)
+    except Exception:
+        pass
+    yield
+
 
 app = FastAPI(
     title="PaaS Command Center",
     description="Unified DevOps, Finance, and Growth dashboard for the Snowflake CoCo CLI Hackathon",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.include_router(ops.router)

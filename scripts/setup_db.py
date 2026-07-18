@@ -213,10 +213,26 @@ def generate_customer_crm(cur, num_records=300):
 
 
 def main():
-    conn = get_connection()
+    if not os.getenv("SNOWFLAKE_ACCOUNT"):
+        print("SNOWFLAKE_ACCOUNT not set — skipping database setup.")
+        print("Set environment variables and re-run to populate tables.")
+        return
+
+    try:
+        conn = get_connection()
+    except Exception as e:
+        print(f"Could not connect to Snowflake: {e}")
+        print("Skipping database setup. The app will still start.")
+        return
+
     cur = conn.cursor()
     try:
         create_tables(cur)
+        # Check if data already exists to avoid duplicates on redeploy
+        cur.execute("SELECT COUNT(*) FROM devops_logs")
+        if cur.fetchone()[0] > 0:
+            print("Tables already populated — skipping data insert.")
+            return
         generate_devops_logs(cur)
         generate_saas_financials(cur)
         generate_customer_crm(cur)
