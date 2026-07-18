@@ -1,0 +1,258 @@
+name: paas_command_center
+description: >
+  Unified semantic model for the PaaS Command Center covering DevOps monitoring,
+  SaaS financial transactions, and customer growth/churn analytics.
+  Links infrastructure incidents to financial impact and customer churn risk.
+
+tables:
+  - name: devops_logs
+    description: API request logs with status codes, response times, and error messages. Captures service health including a major outage on 2025-06-15 14:00-16:00 UTC.
+    base_table:
+      database: PAAS_COMMAND_CENTER
+      schema: PUBLIC
+      table: DEVOPS_LOGS
+    dimensions:
+      - name: endpoint
+        description: The API endpoint path (e.g., /checkout, /login, /api/products, /dashboard)
+        expr: endpoint
+        data_type: VARCHAR
+      - name: error_message
+        description: Error description for non-2xx responses. NULL for successful requests.
+        expr: error_message
+        data_type: VARCHAR
+      - name: status_category
+        description: Human-readable status grouping (Success, Client Error, Server Error)
+        expr: >
+          CASE
+            WHEN status_code BETWEEN 200 AND 299 THEN 'Success'
+            WHEN status_code BETWEEN 400 AND 499 THEN 'Client Error'
+            WHEN status_code >= 500 THEN 'Server Error'
+            ELSE 'Other'
+          END
+        data_type: VARCHAR
+    time_dimensions:
+      - name: timestamp
+        description: When the request was made
+        expr: timestamp
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: total_requests
+        description: Count of all API requests
+        expr: "1"
+        default_aggregation: count
+      - name: error_count
+        description: Count of server errors (5xx status codes)
+        expr: CASE WHEN status_code >= 500 THEN 1 ELSE 0 END
+        default_aggregation: sum
+      - name: error_rate_pct
+        description: Percentage of requests resulting in server errors
+        expr: (SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(*), 0)
+        default_aggregation: identity
+      - name: avg_response_time_ms
+        description: Average response time in milliseconds
+        expr: response_time_ms
+        default_aggregation: avg
+      - name: p95_response_time_ms
+        description: 95th percentile response time
+        expr: response_time_ms
+        default_aggregation: percentile_cont(0.95)
+      - name: status_code
+        description: HTTP status code of the response
+        expr: status_code
+        data_type: NUMBER
+
+  - name: saas_financials
+    description: SaaS vendor transactions including infrastructure costs, payments, marketing, and analytics spend. Shows 5-10x cost spikes during the June 15 outage.
+    base_table:
+      database: PAAS_COMMAND_CENTER
+      schema: PUBLIC
+      table: SAAS_FINANCIALS
+    dimensions:
+      - name: vendor_name
+        description: The vendor or service provider (AWS, GCP, Stripe, Datadog, SendGrid, HubSpot, Snowflake, Vercel)
+        expr: vendor_name
+        data_type: VARCHAR
+      - name: category
+        description: Spend category (Infrastructure, Marketing, Analytics, Payments, Communication)
+        expr: category
+        data_type: VARCHAR
+      - name: status
+        description: Transaction status (completed, pending, failed)
+        expr: status
+        data_type: VARCHAR
+      - name: transaction_id
+        description: Unique transaction identifier
+        expr: transaction_id
+        data_type: VARCHAR
+    time_dimensions:
+      - name: timestamp
+        description: When the transaction occurred
+        expr: timestamp
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: total_spend
+        description: Total dollar amount spent
+        expr: amount
+        default_aggregation: sum
+      - name: avg_transaction_amount
+        description: Average transaction size
+        expr: amount
+        default_aggregation: avg
+      - name: transaction_count
+        description: Number of transactions
+        expr: "1"
+        default_aggregation: count
+      - name: failed_transaction_count
+        description: Count of failed transactions
+        expr: CASE WHEN status = 'failed' THEN 1 ELSE 0 END
+        default_aggregation: sum
+
+  - name: customer_crm
+    description: Customer profiles with plan tier, lifetime value, and churn risk scores. High-value customers (LTV > $40k) show elevated churn risk (0.65-0.95) after the June 15 outage.
+    base_table:
+      database: PAAS_COMMAND_CENTER
+      schema: PUBLIC
+      table: CUSTOMER_CRM
+    dimensions:
+      - name: customer_id
+        description: Unique customer identifier
+        expr: customer_id
+        data_type: VARCHAR
+      - name: name
+        description: Customer full name
+        expr: name
+        data_type: VARCHAR
+      - name: email
+        description: Customer email address
+        expr: email
+        data_type: VARCHAR
+      - name: plan_tier
+        description: Subscription tier (Free, Starter, Pro, Enterprise)
+        expr: plan_tier
+        data_type: VARCHAR
+      - name: churn_risk_category
+        description: Risk level based on churn score
+        expr: >
+          CASE
+            WHEN churn_risk_score >= 0.8 THEN 'Critical'
+            WHEN churn_risk_score >= 0.65 THEN 'High'
+            WHEN churn_risk_score >= 0.4 THEN 'Moderate'
+            ELSE 'Low'
+          END
+        data_type: VARCHAR
+    time_dimensions:
+      - name: last_active
+        description: When the customer was last active on the platform
+        expr: last_active
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: lifetime_value
+        description: Customer lifetime value in dollars
+        expr: lifetime_value
+        default_aggregation: sum
+      - name: avg_lifetime_value
+        description: Average customer lifetime value
+        expr: lifetime_value
+        default_aggregation: avg
+      - name: customer_count
+        description: Number of customers
+        expr: "1"
+        default_aggregation: count
+      - name: churn_risk_score
+        description: ML-predicted churn probability (0-1)
+        expr: churn_risk_score
+        default_aggregation: avg
+      - name: revenue_at_risk
+        description: LTV of customers with churn risk >= 0.65
+        expr: CASE WHEN churn_risk_score >= 0.65 THEN lifetime_value ELSE 0 END
+        default_aggregation: sum
+
+relationships:
+  - name: outage_cost_correlation
+    description: >
+      Links DevOps outage windows to financial cost spikes by timestamp overlap.
+      During 2025-06-15 14:00-16:00, infrastructure costs spiked 5-10x while
+      Stripe payment failures reached 70%.
+    left_table: devops_logs
+    right_table: saas_financials
+    join_type: time_correlation
+    relationship_type: many_to_many
+    correlation_window: 1 hour
+
+  - name: outage_churn_impact
+    description: >
+      Connects service outages to customer churn risk elevation.
+      High-value customers who went inactive before/during the outage
+      show 0.65-0.95 churn risk scores.
+    left_table: devops_logs
+    right_table: customer_crm
+    join_type: causal_correlation
+    relationship_type: one_to_many
+
+verified_queries:
+  - name: outage_error_timeline
+    question: What was the error rate during the June 15 outage?
+    sql: >
+      SELECT DATE_TRUNC('minute', timestamp) AS minute,
+             endpoint,
+             COUNT(*) AS requests,
+             SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) AS errors,
+             ROUND(AVG(response_time_ms), 0) AS avg_response_ms
+      FROM devops_logs
+      WHERE timestamp BETWEEN '2025-06-15 14:00:00' AND '2025-06-15 17:00:00'
+      GROUP BY 1, 2
+      ORDER BY 1
+
+  - name: outage_cost_impact
+    question: How much did the outage cost in infrastructure spend?
+    sql: >
+      SELECT vendor_name,
+             COUNT(*) AS transactions,
+             ROUND(SUM(amount), 2) AS total_cost,
+             ROUND(AVG(amount), 2) AS avg_per_txn
+      FROM saas_financials
+      WHERE timestamp BETWEEN '2025-06-15 14:00:00' AND '2025-06-15 16:00:00'
+        AND category = 'Infrastructure'
+      GROUP BY vendor_name
+      ORDER BY total_cost DESC
+
+  - name: revenue_at_risk_by_tier
+    question: What revenue is at risk from customers likely to churn?
+    sql: >
+      SELECT plan_tier,
+             COUNT(*) AS customers_at_risk,
+             ROUND(SUM(lifetime_value), 2) AS total_revenue_at_risk,
+             ROUND(AVG(churn_risk_score), 3) AS avg_churn_score
+      FROM customer_crm
+      WHERE churn_risk_score >= 0.65
+      GROUP BY plan_tier
+      ORDER BY total_revenue_at_risk DESC
+
+  - name: cross_domain_incident_summary
+    question: Give me a full incident summary linking errors, costs, and customer impact.
+    sql: >
+      WITH outage_errors AS (
+        SELECT COUNT(*) AS total_errors,
+               ROUND(AVG(response_time_ms), 0) AS avg_response_ms,
+               COUNT(DISTINCT endpoint) AS affected_endpoints
+        FROM devops_logs
+        WHERE timestamp BETWEEN '2025-06-15 14:00:00' AND '2025-06-15 16:00:00'
+          AND status_code >= 500
+      ),
+      outage_costs AS (
+        SELECT ROUND(SUM(amount), 2) AS total_infrastructure_cost,
+               COUNT(*) AS cost_transactions
+        FROM saas_financials
+        WHERE timestamp BETWEEN '2025-06-15 14:00:00' AND '2025-06-15 16:00:00'
+          AND category = 'Infrastructure'
+      ),
+      churn_impact AS (
+        SELECT COUNT(*) AS at_risk_customers,
+               ROUND(SUM(lifetime_value), 2) AS revenue_at_risk
+        FROM customer_crm
+        WHERE churn_risk_score >= 0.65
+      )
+      SELECT e.total_errors, e.avg_response_ms, e.affected_endpoints,
+             c.total_infrastructure_cost, c.cost_transactions,
+             r.at_risk_customers, r.revenue_at_risk
+      FROM outage_errors e, outage_costs c, churn_impact r

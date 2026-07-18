@@ -1,0 +1,30 @@
+name: paas-command-center
+display_name: PaaS Command Center
+description: >
+  AI-native unified operations platform that correlates DevOps incidents,
+  SaaS financial impact, and customer churn risk through natural language.
+  Ask questions across all three domains and get cross-functional insights.
+version: 1.0.0
+author: PaaS Command Center Team
+
+triggers:
+  - "paas"
+  - "command center"
+  - "incident"
+  - "outage"
+  - "churn"
+  - "infrastructure cost"
+  - "revenue at risk"
+
+capabilities:
+  - Cross-domain incident analysis (DevOps + Finance + Growth)
+  - Natural language query routing to appropriate data domain
+  - Cortex Analyst integration with semantic model
+  - Real-time churn risk assessment linked to infrastructure events
+  - Automated retention campaign recommendations
+
+tools:
+  - sql_execute
+  - cortex_analyst
+
+semantic_model: semantic_model/paas_command_center.yaml
