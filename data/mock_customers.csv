@@ -1,0 +1,21 @@
+customer_id,name,email,plan_tier,lifetime_value,churn_risk_score,last_active
+CUST-0001,Alice Johnson,alice.johnson12@example.com,Enterprise,285000.00,0.92,2025-06-08T10:00:00
+CUST-0002,Bob Williams,bob.williams45@example.com,Enterprise,195000.00,0.88,2025-06-10T14:30:00
+CUST-0003,Carol Davis,carol.davis78@example.com,Enterprise,142000.00,0.85,2025-06-09T09:00:00
+CUST-0004,David Brown,david.brown33@example.com,Enterprise,98000.00,0.78,2025-06-11T16:00:00
+CUST-0005,Eve Garcia,eve.garcia21@example.com,Enterprise,76000.00,0.72,2025-06-12T08:30:00
+CUST-0006,Frank Miller,frank.miller55@example.com,Pro,62000.00,0.68,2025-06-13T11:00:00
+CUST-0007,Grace Wilson,grace.wilson89@example.com,Pro,54000.00,0.71,2025-06-12T15:00:00
+CUST-0008,Hank Taylor,hank.taylor14@example.com,Pro,48000.00,0.65,2025-06-13T09:30:00
+CUST-0009,Irene Anderson,irene.anderson67@example.com,Pro,41000.00,0.66,2025-06-14T07:00:00
+CUST-0010,Jack Thomas,jack.thomas92@example.com,Pro,35000.00,0.52,2025-06-14T12:00:00
+CUST-0011,Karen Jackson,karen.jackson38@example.com,Pro,28000.00,0.48,2025-06-14T14:00:00
+CUST-0012,Leo White,leo.white71@example.com,Pro,22000.00,0.42,2025-06-15T06:00:00
+CUST-0013,Mia Harris,mia.harris44@example.com,Starter,11500.00,0.35,2025-06-15T08:00:00
+CUST-0014,Nathan Martin,nathan.martin26@example.com,Starter,8200.00,0.28,2025-06-15T10:00:00
+CUST-0015,Olivia Smith,olivia.smith63@example.com,Starter,6800.00,0.31,2025-06-14T20:00:00
+CUST-0016,Paul Jones,paul.jones87@example.com,Starter,4500.00,0.22,2025-06-15T12:00:00
+CUST-0017,Quinn Garcia,quinn.garcia19@example.com,Starter,3200.00,0.18,2025-06-15T09:00:00
+CUST-0018,Rachel Brown,rachel.brown52@example.com,Free,450.00,0.12,2025-06-15T11:00:00
+CUST-0019,Sam Davis,sam.davis74@example.com,Free,280.00,0.08,2025-06-15T13:00:00
+CUST-0020,Tina Wilson,tina.wilson41@example.com,Free,120.00,0.05,2025-06-15T07:00:00

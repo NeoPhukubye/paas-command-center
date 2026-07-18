@@ -1,0 +1,86 @@
+timestamp,endpoint,status_code,response_time_ms,error_message
+2025-06-13T08:12:33,/dashboard,200,45,
+2025-06-13T08:14:01,/api/products,200,120,
+2025-06-13T08:15:22,/checkout,200,210,
+2025-06-13T08:18:45,/login,200,88,
+2025-06-13T08:22:10,/health,200,12,
+2025-06-13T09:01:00,/api/users,200,95,
+2025-06-13T09:15:33,/checkout,200,180,
+2025-06-13T09:30:12,/dashboard,200,52,
+2025-06-13T10:00:00,/api/products,404,55,
+2025-06-13T10:22:18,/login,200,72,
+2025-06-13T11:05:00,/checkout,200,195,
+2025-06-13T12:30:00,/api/products,200,110,
+2025-06-13T14:00:00,/dashboard,200,48,
+2025-06-13T15:30:00,/checkout,500,3200,Internal Server Error: database connection timeout
+2025-06-13T16:45:00,/api/users,200,88,
+2025-06-13T18:00:00,/login,200,65,
+2025-06-13T20:00:00,/health,200,10,
+2025-06-14T02:00:00,/checkout,200,175,
+2025-06-14T06:30:00,/dashboard,200,42,
+2025-06-14T08:00:00,/api/products,200,130,
+2025-06-14T09:15:00,/login,200,78,
+2025-06-14T10:30:00,/checkout,200,190,
+2025-06-14T11:45:00,/api/users,200,92,
+2025-06-14T12:00:00,/health,200,11,
+2025-06-14T13:30:00,/dashboard,200,50,
+2025-06-14T14:15:00,/checkout,200,205,
+2025-06-14T15:00:00,/api/products,200,115,
+2025-06-14T16:30:00,/login,301,35,
+2025-06-14T18:00:00,/checkout,200,188,
+2025-06-14T20:00:00,/dashboard,200,44,
+2025-06-15T00:00:00,/health,200,10,
+2025-06-15T06:00:00,/checkout,200,195,
+2025-06-15T08:00:00,/api/products,200,125,
+2025-06-15T10:00:00,/login,200,70,
+2025-06-15T12:00:00,/dashboard,200,48,
+2025-06-15T13:00:00,/checkout,200,200,
+2025-06-15T13:30:00,/api/users,200,90,
+2025-06-15T13:45:00,/checkout,200,350,
+2025-06-15T13:55:00,/checkout,200,580,
+2025-06-15T14:00:00,/checkout,500,4500,Internal Server Error: database connection timeout
+2025-06-15T14:01:00,/checkout,500,5200,Internal Server Error: connection pool exhausted
+2025-06-15T14:02:00,/checkout,500,6100,Internal Server Error: payment gateway unreachable
+2025-06-15T14:03:00,/checkout,503,7800,Service Unavailable: circuit breaker open
+2025-06-15T14:04:00,/login,503,3500,Service Unavailable: circuit breaker open
+2025-06-15T14:05:00,/checkout,500,8200,Internal Server Error: out of memory
+2025-06-15T14:06:00,/api/products,503,4200,Service Unavailable: circuit breaker open
+2025-06-15T14:08:00,/checkout,502,9500,Bad Gateway: upstream server not responding
+2025-06-15T14:10:00,/checkout,500,11000,Internal Server Error: database connection timeout
+2025-06-15T14:12:00,/login,500,3800,Internal Server Error: connection pool exhausted
+2025-06-15T14:15:00,/checkout,500,12500,Internal Server Error: out of memory
+2025-06-15T14:18:00,/api/products,408,5500,Request Timeout: client connection dropped
+2025-06-15T14:20:00,/checkout,503,14000,Service Unavailable: circuit breaker open
+2025-06-15T14:25:00,/checkout,500,13200,Internal Server Error: payment gateway unreachable
+2025-06-15T14:30:00,/login,503,4100,Service Unavailable: circuit breaker open
+2025-06-15T14:35:00,/checkout,500,11800,Internal Server Error: database connection timeout
+2025-06-15T14:40:00,/checkout,502,10500,Bad Gateway: upstream server not responding
+2025-06-15T14:45:00,/api/products,500,5000,Internal Server Error: connection pool exhausted
+2025-06-15T14:50:00,/checkout,500,12000,Internal Server Error: out of memory
+2025-06-15T14:55:00,/checkout,503,13500,Service Unavailable: circuit breaker open
+2025-06-15T15:00:00,/checkout,500,11500,Internal Server Error: payment gateway unreachable
+2025-06-15T15:10:00,/login,408,3200,Request Timeout: client connection dropped
+2025-06-15T15:15:00,/checkout,500,10800,Internal Server Error: database connection timeout
+2025-06-15T15:20:00,/checkout,500,9800,Internal Server Error: connection pool exhausted
+2025-06-15T15:30:00,/checkout,503,8500,Service Unavailable: circuit breaker open
+2025-06-15T15:40:00,/api/products,503,4500,Service Unavailable: circuit breaker open
+2025-06-15T15:45:00,/checkout,500,7200,Internal Server Error: out of memory
+2025-06-15T15:50:00,/checkout,500,6800,Internal Server Error: payment gateway unreachable
+2025-06-15T15:55:00,/checkout,500,5500,Internal Server Error: database connection timeout
+2025-06-15T16:00:00,/checkout,500,4200,Internal Server Error: connection pool exhausted
+2025-06-15T16:05:00,/checkout,200,2800,
+2025-06-15T16:10:00,/login,200,1500,
+2025-06-15T16:15:00,/checkout,500,2200,Internal Server Error: database connection timeout
+2025-06-15T16:20:00,/checkout,200,1800,
+2025-06-15T16:25:00,/api/products,200,800,
+2025-06-15T16:30:00,/checkout,200,1200,
+2025-06-15T16:35:00,/checkout,408,1500,Request Timeout: client connection dropped
+2025-06-15T16:40:00,/login,200,600,
+2025-06-15T16:45:00,/checkout,200,900,
+2025-06-15T16:50:00,/dashboard,200,400,
+2025-06-15T16:55:00,/checkout,200,650,
+2025-06-15T17:00:00,/checkout,200,350,
+2025-06-15T17:30:00,/api/products,200,130,
+2025-06-15T18:00:00,/login,200,72,
+2025-06-15T19:00:00,/checkout,200,195,
+2025-06-15T20:00:00,/dashboard,200,45,
