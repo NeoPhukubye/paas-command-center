@@ -260,6 +260,7 @@ class TestMain:
         mock_cur = MagicMock()
         mock_get_conn.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cur
+        mock_cur.fetchone.return_value = (0,)
 
         with patch("setup_db.create_tables") as m_create, \
              patch("setup_db.generate_devops_logs") as m_devops, \
