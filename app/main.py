@@ -298,4 +298,36 @@ def dashboard():
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "service": "paas-command-center"}
+    from app.config import settings
+    has_account = bool(settings.SNOWFLAKE_ACCOUNT)
+    has_user = bool(settings.SNOWFLAKE_USER)
+    has_auth = bool(settings.SNOWFLAKE_PASSWORD) or bool(settings.SNOWFLAKE_PRIVATE_KEY)
+    has_db = bool(settings.SNOWFLAKE_DATABASE)
+
+    db_connected = False
+    db_error = None
+    if has_account and has_user and has_auth:
+        try:
+            from app.utils.helpers import get_connection
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT CURRENT_DATABASE(), CURRENT_SCHEMA()")
+            row = cur.fetchone()
+            db_connected = True
+            cur.close()
+            conn.close()
+        except Exception as e:
+            db_error = str(e)
+
+    return {
+        "status": "healthy" if db_connected else "degraded",
+        "service": "paas-command-center",
+        "snowflake": {
+            "account_configured": has_account,
+            "user_configured": has_user,
+            "auth_configured": has_auth,
+            "database_configured": has_db,
+            "connected": db_connected,
+            "error": db_error,
+        },
+    }

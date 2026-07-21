@@ -76,6 +76,8 @@ def query(sql: str, params: tuple = ()) -> list[dict]:
         cur.execute(sql, params)
         columns = [desc[0].lower() for desc in cur.description]
         return [dict(zip(columns, row)) for row in cur.fetchall()]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Query failed: {str(e)}")
     finally:
         cur.close()
         conn.close()
