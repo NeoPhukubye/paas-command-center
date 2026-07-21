@@ -39,14 +39,13 @@ def cost_spike():
     return query("""
         SELECT
             DATE_TRUNC('hour', timestamp) AS hour,
-            category,
-            ROUND(SUM(amount), 2) AS total_cost,
-            COUNT(*) AS txn_count
+            ROUND(SUM(amount), 2) AS hourly_cost,
+            COUNT(*) AS txn_count,
+            SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed_txns
         FROM saas_financials
         WHERE category = 'Infrastructure'
-        GROUP BY DATE_TRUNC('hour', timestamp), category
-        ORDER BY total_cost DESC
-        LIMIT 20
+        GROUP BY DATE_TRUNC('hour', timestamp)
+        ORDER BY hour
     """)
 
 
