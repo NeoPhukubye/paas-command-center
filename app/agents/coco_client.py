@@ -83,38 +83,53 @@ def _get_connection():
     return get_connection()
 
 
-def execute_cortex_analyst(question: str) -> Optional[dict]:
+def execute_cortex_analyst(question: str, retry: bool = True) -> Optional[dict]:
     """
     Query via Cortex Analyst using the semantic model.
     Returns structured results if the model can answer, None otherwise.
+    Includes retry logic and diagnostic info on failure.
     """
     if not HAS_SNOWFLAKE or not settings.SNOWFLAKE_ACCOUNT:
         return None
 
-    try:
-        conn = _get_connection()
-        cur = conn.cursor()
+    semantic_model_path = "@PAAS_COMMAND_CENTER.PUBLIC.SEMANTIC_MODELS/paas_command_center.yaml"
+
+    for attempt in range(2 if retry else 1):
         try:
-            semantic_model_path = "@PAAS_COMMAND_CENTER.PUBLIC.SEMANTIC_MODELS/paas_command_center.yaml"
-            analyst_request = json.dumps({
-                "messages": [{"role": "user", "content": [{"type": "text", "text": question}]}],
-                "semantic_model_file": semantic_model_path,
-            })
-            cur.execute(
-                "SELECT SNOWFLAKE.CORTEX.ANALYST(%s) AS response",
-                (analyst_request,),
-            )
-            result = cur.fetchone()
-            if result and result[0]:
-                response = json.loads(result[0]) if isinstance(result[0], str) else result[0]
-                return {"source": "cortex_analyst", "response": response}
+            conn = _get_connection()
+            cur = conn.cursor()
+            try:
+                analyst_request = json.dumps({
+                    "messages": [{"role": "user", "content": [{"type": "text", "text": question}]}],
+                    "semantic_model_file": semantic_model_path,
+                })
+                cur.execute(
+                    "SELECT SNOWFLAKE.CORTEX.ANALYST(%s) AS response",
+                    (analyst_request,),
+                )
+                result = cur.fetchone()
+                if result and result[0]:
+                    response = json.loads(result[0]) if isinstance(result[0], str) else result[0]
+                    # Extract SQL and results if present in Analyst response
+                    if isinstance(response, dict):
+                        return {"source": "cortex_analyst", "response": response}
+                    return {"source": "cortex_analyst", "response": {"content": response}}
+            except Exception as e:
+                error_msg = str(e).lower()
+                # Don't retry on semantic model not found — it won't fix itself
+                if "does not exist" in error_msg or "not found" in error_msg:
+                    return None
+                if attempt == 0 and retry:
+                    continue
+                return None
+            finally:
+                cur.close()
+                conn.close()
         except Exception:
+            if attempt == 0 and retry:
+                continue
             return None
-        finally:
-            cur.close()
-            conn.close()
-    except Exception:
-        return None
+    return None
 
 
 def execute_cortex_query(question: str, domain: Optional[str] = None) -> dict:

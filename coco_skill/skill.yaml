@@ -3,8 +3,9 @@ display_name: PaaS Command Center
 description: >
   AI-native unified operations platform that correlates DevOps incidents,
   SaaS financial impact, and customer churn risk through natural language.
-  Ask questions across all three domains and get cross-functional insights.
-version: 1.0.0
+  Detects anomalies dynamically, generates cross-domain correlation reports,
+  and provides prioritized action recommendations. Powered by Snowflake Cortex.
+version: 2.0.0
 author: PaaS Command Center Team
 
 triggers:
@@ -15,13 +16,23 @@ triggers:
   - "churn"
   - "infrastructure cost"
   - "revenue at risk"
+  - "cost spike"
+  - "error rate"
+  - "service health"
+  - "customer risk"
+  - "cross-domain"
+  - "correlate"
+  - "retention"
+  - "operational intelligence"
 
 capabilities:
-  - Cross-domain incident analysis (DevOps + Finance + Growth)
-  - Natural language query routing to appropriate data domain
-  - Cortex Analyst integration with semantic model
+  - Dynamic incident detection via statistical anomaly analysis
+  - Cross-domain correlation (DevOps errors + Finance costs + Customer churn)
+  - Natural language query routing with Cortex Analyst semantic model
   - Real-time churn risk assessment linked to infrastructure events
-  - Automated retention campaign recommendations
+  - Automated prioritized action recommendations (P0-P3)
+  - Time-window correlation for any incident period
+  - Verified SQL generation via semantic model (hallucination-resistant)
 
 tools:
   - sql_execute
