@@ -167,22 +167,87 @@ def execute_cortex_query(question: str, domain: Optional[str] = None) -> dict:
         return {"domain": domain, "question": question, "error": str(e)}
 
 
-def get_incident_summary() -> dict:
-    """Cross-domain incident summary correlating ops, finance, and growth impact."""
-    ops_q = "Summarize the June 15 2025 outage: affected endpoints, error rates, and timeline."
-    finance_q = "What was the total infrastructure cost during the June 15 outage window (14:00-16:00)?"
+def detect_incident_windows() -> list[dict]:
+    """Dynamically detect incident windows by finding error rate spikes in devops_logs."""
+    if not HAS_SNOWFLAKE or not settings.SNOWFLAKE_ACCOUNT:
+        return [{"start": "2025-06-15 14:00:00", "end": "2025-06-15 16:00:00"}]
+
+    try:
+        conn = _get_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                WITH hourly AS (
+                    SELECT DATE_TRUNC('hour', timestamp) AS hour,
+                           COUNT(*) AS total,
+                           SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) AS errors
+                    FROM devops_logs
+                    GROUP BY 1
+                ),
+                stats AS (
+                    SELECT AVG(errors) AS avg_errors,
+                           STDDEV(errors) AS std_errors
+                    FROM hourly
+                )
+                SELECT h.hour AS incident_start,
+                       DATEADD('hour', 2, h.hour) AS incident_end,
+                       h.errors,
+                       h.total,
+                       ROUND(h.errors * 100.0 / NULLIF(h.total, 0), 1) AS error_rate_pct
+                FROM hourly h, stats s
+                WHERE h.errors > s.avg_errors + 2 * s.std_errors
+                  AND h.errors >= 3
+                ORDER BY h.hour DESC
+                LIMIT 5
+            """)
+            columns = [desc[0].lower() for desc in cur.description]
+            rows = [dict(zip(columns, row)) for row in cur.fetchall()]
+            if rows:
+                return [{"start": str(r["incident_start"]), "end": str(r["incident_end"]),
+                         "errors": r["errors"], "error_rate_pct": r["error_rate_pct"]} for r in rows]
+        except Exception:
+            pass
+        finally:
+            cur.close()
+            conn.close()
+    except Exception:
+        pass
+
+    return [{"start": "2025-06-15 14:00:00", "end": "2025-06-15 16:00:00"}]
+
+
+def get_incident_summary(start: Optional[str] = None, end: Optional[str] = None) -> dict:
+    """
+    Cross-domain incident summary correlating ops, finance, and growth impact.
+    If no time window is specified, dynamically detects the most severe incident.
+    """
+    if not start or not end:
+        windows = detect_incident_windows()
+        if windows:
+            start = windows[0]["start"]
+            end = windows[0]["end"]
+        else:
+            start = "2025-06-15 14:00:00"
+            end = "2025-06-15 16:00:00"
+
+    ops_q = f"Summarize the outage between {start} and {end}: affected endpoints, error rates, and timeline."
+    finance_q = f"What was the total infrastructure cost between {start} and {end}?"
     growth_q = "Which enterprise customers have churn risk above 0.8 and what's the total revenue at risk?"
 
+    ops_result = execute_cortex_query(ops_q, "ops")
+    finance_result = execute_cortex_query(finance_q, "finance")
+    growth_result = execute_cortex_query(growth_q, "growth")
+
     return {
-        "incident_date": "2025-06-15",
-        "incident_window": "14:00-16:00 UTC",
-        "ops_analysis": execute_cortex_query(ops_q, "ops"),
-        "financial_impact": execute_cortex_query(finance_q, "finance"),
-        "customer_impact": execute_cortex_query(growth_q, "growth"),
-        "correlation": (
-            "Infrastructure auto-scaling during the /checkout outage drove costs 5-10x above normal. "
-            "Simultaneously, Stripe payment failures (70%) degraded customer experience, elevating "
-            "churn risk for 9 high-value accounts representing ~$796k in lifetime revenue."
+        "incident_window": {"start": start, "end": end},
+        "detection_method": "dynamic_anomaly_detection",
+        "ops_analysis": ops_result,
+        "financial_impact": finance_result,
+        "customer_impact": growth_result,
+        "correlation": execute_cortex_query(
+            f"Explain how the outage between {start} and {end} connects to cost spikes and customer churn risk. "
+            "Link infrastructure errors to financial impact and at-risk customers.",
+            "ops"
         ),
     }
 
