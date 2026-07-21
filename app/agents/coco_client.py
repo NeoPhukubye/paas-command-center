@@ -8,6 +8,7 @@ Falls back to Cortex COMPLETE for open-ended analysis questions.
 
 import json
 import os
+from datetime import datetime, timedelta
 from typing import Optional
 from app.config import settings
 
@@ -26,6 +27,12 @@ operational intelligence by correlating data across three domains:
 
 Your key differentiator: you LINK these domains. An outage is not just errors — it's
 infrastructure cost spikes AND customer churn risk. Always provide cross-domain context.
+
+When presenting cross-domain analysis, structure your response as:
+- INCIDENT: What happened (errors, affected services)
+- FINANCIAL IMPACT: Cost spikes, failed payments
+- CUSTOMER IMPACT: At-risk accounts, revenue exposure
+- RECOMMENDED ACTIONS: Prioritized by urgency (P0-P3)
 
 Tables: devops_logs, saas_financials, customer_crm
 Database: PAAS_COMMAND_CENTER.PUBLIC"""
